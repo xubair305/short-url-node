@@ -22,13 +22,38 @@ async function handleGenerateShortUrl(req, res){
     const uid = new ShortUniqueId();
     const uidWithTimestamp = uid.stamp(10);
 
-    let shortUrl = `http://localhost:3001/${uidWithTimestamp}`
+    let shortUrl = `http://localhost:3001/r/${uidWithTimestamp}`
 
     const result =  await  URL.create({redirectedUrl: body.url, shortId: uidWithTimestamp})
 
     if(!result) return res.status(500).json({ status : false ,message:'Server error'});
     
     return res.status(201).json({status: true, id: uidWithTimestamp, url: shortUrl})
+}
+
+async function handleGenerateUrlStatic(req, res){
+
+  const allUrls = await URL.find({})
+
+  let body = req.body
+
+  const isValidUrl = stringIsAValidUrl(body.url)
+
+  if(!body.url || !isValidUrl) return res.status(404).json({status:false, message: 'Url required or invalid url'})
+
+  const uid = new ShortUniqueId();
+  const uidWithTimestamp = uid.stamp(10);
+
+  let shortUrl = `http://localhost:3001/r/${uidWithTimestamp}`
+
+  const result =  await  URL.create({redirectedUrl: body.url, shortId: uidWithTimestamp})
+
+  // if(!result) return res.status(500).json({ status : false ,message:'Server error'});
+  
+  return res.render('url', {
+      shortUrl: shortUrl,
+      urls: allUrls,
+  })
 }
 
 
@@ -44,4 +69,4 @@ async function  handleRedirectToOriginalURL (req,res){
     return res.redirect(result.redirectedUrl) 
 }
 
-module.exports = {handleGenerateShortUrl,handleRedirectToOriginalURL,}
+module.exports = {handleGenerateShortUrl,handleRedirectToOriginalURL,handleGenerateUrlStatic,}
