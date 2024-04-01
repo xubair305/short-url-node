@@ -1,6 +1,6 @@
 
 const ShortUniqueId = require('short-unique-id');
-const URL = require('../models/url')
+const URL = require('../models/url.models')
 const checkUrl = require("url").URL;
 
 const stringIsAValidUrl = (s) => {
@@ -24,7 +24,13 @@ async function handleGenerateShortUrl(req, res){
 
     let shortUrl = `http://localhost:3001/r/${uidWithTimestamp}`
 
-    const result =  await  URL.create({redirectedUrl: body.url, shortId: uidWithTimestamp})
+    console.log(req.user._id)
+
+    const result =  await  URL.create({
+      redirectedUrl: body.url, 
+      shortId: uidWithTimestamp,
+      createdBy: req.user._id,
+    })
 
     if(!result) return res.status(500).json({ status : false ,message:'Server error'});
     
@@ -33,7 +39,7 @@ async function handleGenerateShortUrl(req, res){
 
 async function handleGenerateUrlStatic(req, res){
 
-  const allUrls = await URL.find({})
+  const allUrls = await URL.find({createdBy : req.user._id})
 
   let body = req.body
 
@@ -46,9 +52,11 @@ async function handleGenerateUrlStatic(req, res){
 
   let shortUrl = `http://localhost:3001/r/${uidWithTimestamp}`
 
-  const result =  await  URL.create({redirectedUrl: body.url, shortId: uidWithTimestamp})
-
-  // if(!result) return res.status(500).json({ status : false ,message:'Server error'});
+  await URL.create({
+    redirectedUrl: body.url,
+    shortId: uidWithTimestamp,
+    createdBy: req.user._id,
+  })
   
   return res.render('url', {
       shortUrl: shortUrl,
@@ -69,4 +77,8 @@ async function  handleRedirectToOriginalURL (req,res){
     return res.redirect(result.redirectedUrl) 
 }
 
-module.exports = {handleGenerateShortUrl,handleRedirectToOriginalURL,handleGenerateUrlStatic,}
+module.exports = {
+  handleGenerateShortUrl,
+  handleRedirectToOriginalURL,
+  handleGenerateUrlStatic,
+}
