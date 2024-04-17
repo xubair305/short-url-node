@@ -23,10 +23,7 @@ connectDb(process.env.MONGO_URL);
 
 // app.get('/', (req, res) => res.send('Hello World!'))
 
-// app.use("/", staticRoute);
-app.use("/", (req, res) => {
-  return res.send("Hello");
-});
+app.use("/", staticRoute);
 app.use("/user", userRoute);
 app.use("/r", urlRoute);
 
