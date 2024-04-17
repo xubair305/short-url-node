@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 
 const path = require("path");
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 const cookieParser = require("cookie-parser");
 
@@ -18,11 +18,15 @@ const staticRoute = require("./routes/static_router");
 const userRoute = require("./routes/user");
 const { connectDb } = require("./connect");
 
-connectDb("mongodb://127.0.0.1:27017/short-url");
+// connectDb("mongodb://127.0.0.1:27017/short-url");
+connectDb(process.env.MONGO_URL);
 
 // app.get('/', (req, res) => res.send('Hello World!'))
 
-app.use("/", staticRoute);
+// app.use("/", staticRoute);
+app.use("/", (req, res) => {
+  return res.send("Hello");
+});
 app.use("/user", userRoute);
 app.use("/r", urlRoute);
 
